@@ -32,7 +32,7 @@ def clean_dataframe(temp_df, file_name, temp_file_index, temp_features):
     # Death, hospitalizations, and vaccinations data does not need to be delimited and requires different cleaning.
     if file_name != 'DHV_' + today_str + '.csv':
         # Delimits data when a semi-colon appears.
-        temp_df.columns = ['Data']
+        temp_df.columns = ['Data'] ## what is this line for?
         temp_df = temp_df['Data'].str.split(';', expand=True)
 
         # Inserts temp_features as column headers and then drops NA values. Also assigns fecha_resulatado as a datetime.
@@ -40,6 +40,8 @@ def clean_dataframe(temp_df, file_name, temp_file_index, temp_features):
         temp_df = temp_df.replace(r'^\s*$', pd.NA, regex=True)
         temp_df = temp_df.dropna()
         temp_df['fecha_resultado'] = temp_df['fecha_resultado'].astype('datetime64[ns]')
+        ## change date format from dd/mm/yyyy to mm/dd/yyyy
+        #temp_df['fecha_resultado'] = temp_df['fecha_resultado'].apply(lambda x: x.strftime('%m/%d/%y'))
     else:
         # Inserts date that the data was collected and assigns columns headers.
         temp_df.columns = [temp_features[temp_file_index]]
@@ -55,6 +57,8 @@ def clean_dataframe(temp_df, file_name, temp_file_index, temp_features):
 
     # Converts attributes to desired data type which is universal to all data sets.
     temp_df['fecha_recopilacion'] = temp_df['fecha_recopilacion'].astype('datetime64[ns]')
+    ## change date format from dd/mm/yyyy to mm/dd/yyyy
+    #temp_df['fecha_recopilacion'] = temp_df['fecha_recopilacion'].apply(lambda x: x.strftime('%m/%d/%y'))
 
     # Cleans Classification type for deaths since special characters appear in current data.
     if file_name == 'Deaths_' + today_str + '.csv' or file_name == 'DHV_' + today_str + '.csv':
