@@ -40,14 +40,13 @@ def createdb_from_csv_death(death_csv_file, positive_csv_file, db_file, aggregat
     death_data.to_sql('temp_death_table', conn, if_exists='append', index=False)
     
     # Insert data into positive table
-    #feature = ['fecha_resultado', 'departmento', 'provincia', 'distrito']
     positive_data = pd.read_csv(positive_csv_file)
     positive_data = positive_data.rename(columns={'departmento': 'departamento'})
     positive_data = positive_data[feature]
     positive_data.to_sql('temp_positive_table', conn, if_exists='append', index=False)
     
     # tables for death case geographically 
-    #Create table for district-level aggregation
+    # Create table for district-level aggregation
     cur.execute('''
         CREATE TABLE IF NOT EXISTS distrito_death_cases (
             fecha_resultado TEXT,
@@ -86,7 +85,7 @@ def createdb_from_csv_death(death_csv_file, positive_csv_file, db_file, aggregat
     ''')
     
     # tables for positive case geographically
-    #Create table for district-level aggregation
+    # Create table for district-level aggregation
     cur.execute('''
         CREATE TABLE IF NOT EXISTS distrito_positive_cases (
             fecha_resultado TEXT,
@@ -190,55 +189,14 @@ def createdb_from_csv_death(death_csv_file, positive_csv_file, db_file, aggregat
         ORDER BY fecha_resultado
     ''')
     
-            
-    # Join `Death` tables with `Positive` tables
-    query = '''
-            SELECT t1.fecha_resultado, t1.departamento,t1.num_death_cases, t2.num_positive_cases
-            FROM department_positive_cases t2
-            LEFT JOIN department_death_cases t1 ON t1.fecha_resultado = t2.fecha_resultado AND t1.departamento = t2.departamento;
-            
-            UNION
-
-            SELECT t2.fecha_resultado, t2.departamento, t1.num_death_cases, t2.num_positive_cases
-            FROM department_death_cases t1
-            RIGHT JOIN department_positive_cases t2 ON t1.fecha_resultado = t2.fecha_resultado AND t1.departamento = t2.departamento
-
-            WHERE t1.fecha_resultado IS NULL;
-            '''
-    query = '''
-            
-            SELECT d.type,
-         d.color,
-         c.type,
-         c.color
-FROM dogs d
-LEFT JOIN cats c USING(color)
-UNION ALL
-SELECT d.type,
-         d.color,
-         c.type,
-         c.color
-FROM cats c
-LEFT JOIN dogs d USING(color)
-WHERE d.color IS NULL;'''       
-            
-    cur.execute(query)
-    result = cur.fetchmany(10)
-    print(result)
     conn.commit()
     conn.close()
-
-    #TODO:
-    # read db file and aggregate on daily basic 
-    # aggregate only new data
-    # pgadmin4 (access to database)
-    # 
-
+    
 if __name__ == '__main__':
     file_names = ['Positive_Cases_', 'Deaths_', 'DHV_']
     # Index for iterating through file name list/features and gets current time.
     file_index = 0
-    # Get today's date
+    
     today = date.today()
     today_str = str(today)
     positive_csv_file = file_names[file_index] + today_str + ".csv"
